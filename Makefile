@@ -2,7 +2,7 @@ BIN=bin
 CC=gcc
 CFLAGS=
 LDFLAGS=
-EXECUTABLES=part1a_client part1a_server part1c_client part1c_server part3_sender part3_receiver
+EXECUTABLES=part1a_client part1a_server part1c_client part1c_server part3_sender part3_receiver part1b_client part1b_server part4a_client part4a_server part4b_client part4b_server
 HOST=localhost
 
 $(EXECUTABLES):
