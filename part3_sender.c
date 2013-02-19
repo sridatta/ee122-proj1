@@ -14,9 +14,13 @@
 #define FILE_BUFFER_SIZE 200
 
 int main(int argc, char *argv[]){
+  if(argc != 4){
+    printf("usage: host port filename\n");
+    exit(0);
+  }
 
-  int sockfd;
   int status;
+  int sockfd;
 
   struct addrinfo hints;
   memset(&hints, 0, sizeof hints);
@@ -44,34 +48,34 @@ int main(int argc, char *argv[]){
     exit(2);
   }
 
-  char snd_buf[FILE_BUFFER_SIZE];
-  memset(snd_buf, 0, sizeof snd_buf);
-
   char rcv_buf[FILE_BUFFER_SIZE];
-  memset(rcv_buf, 0, sizeof rcv_buf);
+  memset(rcv_buf,0,sizeof(rcv_buf));
 
-  sprintf(snd_buf, "IAMALLDONE");
-  sendto(sockfd, &snd_buf, 11, 0, p->ai_addr, p->ai_addrlen);
+  char snd_buf[FILE_BUFFER_SIZE];
+  memset(snd_buf,0,sizeof(snd_buf));
 
   sprintf(snd_buf, "START");
   do {
     sendto(sockfd, &snd_buf, 6, 0, p->ai_addr, p->ai_addrlen);
   } while(!await_ack(sockfd, rcv_buf, "ACKSTART"));
 
-  memset(snd_buf, 1, sizeof snd_buf);
 
+  memset(snd_buf,1,sizeof(snd_buf));
   int i;
   for(i = 0; i < 200; i++){
-    sendto(sockfd, &snd_buf, sizeof(snd_buf), 0, p->ai_addr, p->ai_addrlen);
-    sleep(50);
+    sendto(sockfd, &snd_buf, FILE_BUFFER_SIZE, 0, p->ai_addr, p->ai_addrlen);
+    usleep(50000);
   }
+
 
   sprintf(snd_buf, "COMPLETE");
   do {
     sendto(sockfd, &snd_buf, 9, 0, p->ai_addr, p->ai_addrlen);
   } while(!await_ack(sockfd, rcv_buf, "ACKCOMPLETE"));
 
+  freeaddrinfo(res);
   close(sockfd);
+  exit(0);
 }
 
 int await_ack(int sockfd, char *buf, char* expected){

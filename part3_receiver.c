@@ -72,12 +72,12 @@ int main(int argc, char *argv[]){
       exit(1);
     }
 
-    printf("Received: %s\n", rcv_buf);
-
     if(strcmp(rcv_buf, "START") == 0){
+      printf("Received START\n");
       sendto(sockfd, "ACKSTART", 9, 0,  &src_addr, src_len);
       ready = 1;
     } else if(strcmp(rcv_buf, "COMPLETE") == 0){
+      printf("Received COMPLETE\n");
       sendto(sockfd, "ACKCOMPLETE", 12, 0,  &src_addr, src_len);
       break;
     } else if(ready){
@@ -89,6 +89,7 @@ int main(int argc, char *argv[]){
         printf("Elapsed time: %ld milliseconds\n", mtime);
       }
       gettimeofday(&last_time, NULL);;
+      is_first = 0;
     } else {
       fprintf(stderr, "Received packet out of sequence");
       return -1;
