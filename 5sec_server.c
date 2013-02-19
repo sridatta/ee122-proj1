@@ -72,33 +72,31 @@ int main(int argc, char *argv[]){
   struct timeval timeout;
   while (1) {
     timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
     time_t starttime = time(NULL);
     time_t looptime = time(NULL);
       while(timeout.tv_sec > 0) {
-        setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(int));
+        setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
         read_count = recvfrom(sockfd, &buff, BUFFER_SIZE, 0, &src_addr, &src_len);
-        if(strcmp(buff, BLINK_MSG) == 0 && !firsttime){
-          time_t currtime = time(NULL);
-          printf("Received chirp: Delay is %f seconds.\n", difftime(currtime, starttime));
+	if(read_count <= 0) {
+	  /*printf("Socket timeout.\n");*/
+        }
+        else if(strcmp(buff, BLINK_MSG) == 0){
           if (bytequeue_push(&queue, buff) < 0)
               printf("Buffer overflow.\n");
-          timeout.tv_sec -= difftime(currtime, starttime)*1000;
-          starttime = currtime;
-        }
-        else if (strcmp(buff, BLINK_MSG) == 0 && firsttime) {
-            printf("Connection established.\n");
-            firsttime = 0;
-            starttime = time(NULL);
         }
         else {
           printf("Unknown packet received: %s\n", buff);
         }
+        time_t currtime = time(NULL);
+        timeout.tv_sec -= difftime(currtime, starttime);
+        starttime = currtime;
       }
     if (bytequeue_pop(&queue, buff) < 0) {
         printf("Buffer underflow.\n");
     }
     else {
-        printf("BLINK: Delay is %f seconds.\n", difftime(time(NULL), looptime));
+        printf(">>>>>BLINK: Delay is %f seconds.\n", difftime(time(NULL), looptime));
     }
   }
 
