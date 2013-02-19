@@ -14,6 +14,11 @@
 
 int main(int argc, char *argv[]){
 
+  if(argc != 2){
+    printf("Usage: port");
+    return 1;
+  }
+
   int sockfd;
   int status;
 
@@ -22,8 +27,6 @@ int main(int argc, char *argv[]){
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_DGRAM;
   hints.ai_flags = AI_PASSIVE;
-
-  printf("%s\n", argv[1]);
 
   struct addrinfo *res, *p;
 
