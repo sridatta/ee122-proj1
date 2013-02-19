@@ -14,8 +14,8 @@
 #define FILE_BUFFER_SIZE 200
 
 int main(int argc, char *argv[]){
-  if(argc != 4){
-    printf("usage: host port filename\n");
+  if(argc != 3){
+    printf("usage: host port\n");
     exit(0);
   }
 
