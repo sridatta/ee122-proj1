@@ -76,7 +76,7 @@ int client_loop(int sockfd, char* host, char* port, char* file){
   printf("sending to %s, %s\n", host, port);
   // Set a read timeout on the socket
   struct timeval tv;
-  tv.tv_sec = 30;
+  tv.tv_sec = 2;
   setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO,   &tv, sizeof(struct timeval));
 
   // Setup the file buffer
