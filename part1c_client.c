@@ -138,6 +138,7 @@ int client_loop(int sockfd, char* host, char* port, char* file){
   do {
     sendto(sockfd, &file_buf, 13, 0, res->ai_addr, res->ai_addrlen);
     printf("Retransmit count: %d\n", retransmit_count);
+    retransmit_count++;
   } while(!await_ack(sockfd, rcv_buf, seq_no));
 
   printf("Total read: %d, Total bytes sent: %d\n", total_read, total_sent);
