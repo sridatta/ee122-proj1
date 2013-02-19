@@ -11,7 +11,7 @@
 
 #include "part1c_client.h"
 
-#define FILE_BUFFER_SIZE 255
+#define FILE_BUFFER_SIZE 2048
 #define PORT "34567"
 
 int main(int argc, char *argv[]){
@@ -76,8 +76,13 @@ int client_loop(int sockfd, char* host, char* port, char* file){
   printf("sending to %s, %s\n", host, port);
   // Set a read timeout on the socket
   struct timeval tv;
-  tv.tv_sec = 2;
-  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO,   &tv, sizeof(struct timeval));
+  tv.tv_sec = 0;
+  tv.tv_usec = 10000;
+  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
+  int rv = sizeof(tv);
+  getsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, &rv);
+  printf("GET SOCK OPT IS %d\n", tv.tv_sec);
 
   // Setup the file buffer
   char file_buf[FILE_BUFFER_SIZE];
@@ -109,6 +114,7 @@ int client_loop(int sockfd, char* host, char* port, char* file){
   int seq_no = 0;
   int total_read = 0, total_sent = 0, read_count, write_count;
 
+  int retransmit_count = 0;
   while(read_count = fread(file_buf+sizeof(int), sizeof(char), FILE_BUFFER_SIZE - sizeof(int), fd)) {
     if(ferror(fd)){
       fprintf(stderr, "error: %s\n", strerror(errno));
@@ -119,12 +125,16 @@ int client_loop(int sockfd, char* host, char* port, char* file){
     memcpy(file_buf, &seq_no, sizeof(int));
     do {
       write_count = sendto(sockfd, &file_buf, read_count + sizeof(int), 0, res->ai_addr, res->ai_addrlen);
+      retransmit_count++;
+      //printf("Sending seq no %d\n", seq_no);
     } while(!await_ack(sockfd, rcv_buf, seq_no));
+    printf("Seq. no: %d, Retransmit count: %d\n", seq_no, retransmit_count);
 
     total_read += read_count;
     total_sent += write_count;
 
     seq_no += 1;
+    retransmit_count = 0;
 
     if(feof(fd)){
        break;
@@ -134,14 +144,14 @@ int client_loop(int sockfd, char* host, char* port, char* file){
   // Send finished message
   memcpy(file_buf, &seq_no, sizeof(int));
   sprintf(file_buf+4, "COMPLETE");
-  int retransmit_count = 0;
+  retransmit_count = 0;
   do {
     sendto(sockfd, &file_buf, 13, 0, res->ai_addr, res->ai_addrlen);
-    printf("Retransmit count: %d\n", retransmit_count);
+    //printf("Complete retransmit count: %d\n", retransmit_count);
     retransmit_count++;
   } while(!await_ack(sockfd, rcv_buf, seq_no));
 
-  printf("Total read: %d, Total bytes sent: %d\n", total_read, total_sent);
+  //printf("Total read: %d, Total bytes sent: %d\n", total_read, total_sent);
 
   fclose(fd);
   close(sockfd);
@@ -151,19 +161,29 @@ int await_ack(int sockfd, char *buf, int expected_seq_no){
   // Variable to hold the remote sender's info
   struct sockaddr src_addr;
   int src_len = sizeof src_addr;
-  int return_val;
+  int return_val = 0 ;
   int seq_no = -1;
+
   while(return_val = recvfrom(sockfd, buf, FILE_BUFFER_SIZE, 0, &src_addr, &src_len)){
     if(return_val == -1 && errno == EAGAIN){
+      //printf("Something bad has occured\n");
       return 0;
     }
+
     if(strcmp(buf, "ACK") == 0){
       memcpy(&seq_no, buf+4, sizeof(int));
+      //printf("Got some kind of ACK. Acknowledging %d\n", seq_no);
       if(seq_no == expected_seq_no){
+        //printf("Got the right ACK\n");
         return 1;
       }
-      return 0;
+      //printf("Got the wrong ACK\n");
+      continue;
     }
+
+    //printf("Got something not ACK\n");
+    return 0;
   }
+  //printf("Got no data\n");
   return 0;
 }

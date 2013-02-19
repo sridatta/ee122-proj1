@@ -11,7 +11,7 @@
 
 #include "part1c_server.h"
 
-#define FILE_BUFFER_SIZE 255
+#define FILE_BUFFER_SIZE 2048
 #define PORT "34568"
 
 int main(int argc, char *argv[]){

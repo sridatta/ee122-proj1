@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-const unsigned BUFFER_LEN = 255;
+const unsigned BUFFER_LEN = 2048;
 const char* EOF_STRING = "The file is over.";
 
 int main(int argc, char** argv) {

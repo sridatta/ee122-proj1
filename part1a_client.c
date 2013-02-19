@@ -9,7 +9,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#define FILE_BUFFER_SIZE 255
+#define FILE_BUFFER_SIZE 2048
 
 int main(int argc, char *argv[]){
 
