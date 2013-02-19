@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 
 const unsigned BUFFER_LEN = 255;
 const char* EOF_STRING = "The file is over.";
