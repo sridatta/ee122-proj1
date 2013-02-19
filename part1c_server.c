@@ -102,8 +102,6 @@ int server_loop(int sockfd){
     memcpy(snd_buf+sizeof(int), &curr_seq_no, sizeof(int));
     sendto(sockfd, snd_buf, 8, 0,  &src_addr, src_len);
 
-    printf("%s\n", rcv_buf+sizeof(int));
-
     if(strcmp(rcv_buf+sizeof(int), "COMPLETE") == 0){
       printf("FOOBAR\n");
       break;
