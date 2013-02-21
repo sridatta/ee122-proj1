@@ -14,13 +14,18 @@
 #define FILE_BUFFER_SIZE 200
 
 int main(int argc, char *argv[]){
-  if(argc != 3){
-    printf("usage: host port\n");
+  if(argc < 3){
+    printf("usage: host port [nodelay]\n");
     exit(0);
   }
 
   int status;
   int sockfd;
+
+  int delay = 1;
+  if(argc == 4 && strcmp(argv[3], "nodelay") == 0){
+    delay = 0;
+  }
 
   struct addrinfo hints;
   memset(&hints, 0, sizeof hints);
@@ -64,7 +69,9 @@ int main(int argc, char *argv[]){
   int i;
   for(i = 0; i < 200; i++){
     sendto(sockfd, &snd_buf, FILE_BUFFER_SIZE, 0, p->ai_addr, p->ai_addrlen);
-    usleep(50000);
+    if(delay){
+      usleep(50000);
+    }
   }
 
 
