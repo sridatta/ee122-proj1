@@ -73,7 +73,6 @@ int init_socket(char* port){
 }
 
 int client_loop(int sockfd, char* host, char* port, char* file){
-  printf("sending to %s, %s\n", host, port);
   // Set a read timeout on the socket
   struct timeval tv;
   tv.tv_sec = 0;
@@ -82,7 +81,6 @@ int client_loop(int sockfd, char* host, char* port, char* file){
 
   int rv = sizeof(tv);
   getsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, &rv);
-  printf("GET SOCK OPT IS %d\n", tv.tv_sec);
 
   // Setup the file buffer
   char file_buf[FILE_BUFFER_SIZE];
@@ -128,7 +126,6 @@ int client_loop(int sockfd, char* host, char* port, char* file){
       retransmit_count++;
       //printf("Sending seq no %d\n", seq_no);
     } while(!await_ack(sockfd, rcv_buf, seq_no));
-    printf("Seq. no: %d, Retransmit count: %d\n", seq_no, retransmit_count);
 
     total_read += read_count;
     total_sent += write_count;
